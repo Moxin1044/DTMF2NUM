@@ -24,8 +24,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             gcc-multilib \
-            gcc-aarch64-linux-gnu \
-            gcc-arm-linux-gnueabihf
+            gcc-13-aarch64-linux-gnu \
+            gcc-13-arm-linux-gnueabihf
 
       - name: Build
         run: |
@@ -53,12 +53,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             gcc-mingw-w64-x86-64 \
-            gcc-mingw-w64-i686 \
-            gcc-mingw-w64-aarch64
+            gcc-mingw-w64-i686
+
+      - name: Install LLVM MinGW for Windows ARM64
+        if: matrix.arch == 'aarch64'
+        run: |
+          curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20250326/llvm-mingw-20250326-ucrt-ubuntu-22.04-x86_64.tar.xz -o llvm-mingw.tar.xz
+          tar -xf llvm-mingw.tar.xz
+          echo "$PWD/llvm-mingw-20250326-ucrt-ubuntu-22.04-x86_64/bin" >> $GITHUB_PATH
 
       - name: Build
+        if: matrix.arch != 'aarch64'
         run: |
           ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe -lm dtmf2num.c
+
+      - name: Build (ARM64 via LLVM MinGW)
+        if: matrix.arch == 'aarch64'
+        run: |
+          aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe -lm dtmf2num.c
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

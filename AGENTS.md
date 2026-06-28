@@ -16,12 +16,25 @@ gcc -O2 -s -o dtmf2num -lm dtmf2num.c
 ### Cross-compilation (CI)
 The CI workflow (`.github/workflows/release.yml`) cross-compiles for:
 - **Linux**: x86_64, i686, aarch64, arm (gnueabihf)
-- **Windows**: x86_64, i686, aarch64 (mingw-w64)
+- **Windows**: x86_64, i686 (MinGW-w64), aarch64 (LLVM MinGW)
 - **macOS**: arm64, x86_64
 
-All use the same single-command pattern:
+Linux uses versioned cross-compiler packages (`gcc-13-aarch64-linux-gnu`,
+`gcc-13-arm-linux-gnueabihf`) instead of the meta-packages to avoid dependency
+conflicts on Ubuntu Noble (24.04).
+
+Windows ARM64 is built with LLVM MinGW (downloaded from
+[mstorsjo/llvm-mingw](https://github.com/mstorsjo/llvm-mingw)) because GCC
+MinGW-w64 does not provide an `aarch64` target in Ubuntu repos. The other
+Windows targets use the standard `gcc-mingw-w64-*` apt packages.
+
+Build commands:
 ```bash
+# Linux / Windows x86/x86_64 (GCC)
 ${cross}gcc -O2 -s -o dtmf2num-${suffix} -lm dtmf2num.c
+
+# Windows ARM64 (LLVM MinGW)
+aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-windows-arm64.exe -lm dtmf2num.c
 ```
 
 Releases are only triggered on tags matching `v*`.
