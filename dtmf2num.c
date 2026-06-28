@@ -41,7 +41,7 @@ typedef uint32_t    u32;
 
 
 
-#define VER     "0.2"
+#define VER     "0.3"
 
 
 
