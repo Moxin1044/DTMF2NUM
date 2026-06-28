@@ -192,6 +192,10 @@ Luigi Auriemma
 - Website: [aluigi.org](https://aluigi.org)
 - GitHub: [@aluigi](https://github.com/aluigi)
 
+## Contributors / 贡献者
+
+**[Moxin1044](https://github.com/Moxin1044)** — CI/CD pipeline setup, multi-platform automated builds (GitHub Actions). / CI/CD 流水线搭建、多平台自动化构建（GitHub Actions）。
+
 ---
 
 ## Contributing / 贡献
