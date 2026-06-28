@@ -11,21 +11,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: x86_64,  target: x86_64-linux-gnu,      cross: '',              suffix: linux-amd64 }
-          - { arch: i686,    target: i686-linux-gnu,         cross: 'i686-linux-gnu-',        suffix: linux-386 }
-          - { arch: aarch64, target: aarch64-linux-gnu,      cross: 'aarch64-linux-gnu-',     suffix: linux-arm64 }
-          - { arch: arm,     target: arm-linux-gnueabihf,    cross: 'arm-linux-gnueabihf-',   suffix: linux-arm }
+          - { arch: x86_64,  target: x86_64-linux-gnu,      cross: '',              suffix: linux-amd64, pkg: '' }
+          - { arch: i686,    target: i686-linux-gnu,         cross: 'i686-linux-gnu-',        suffix: linux-386,   pkg: 'gcc-multilib' }
+          - { arch: aarch64, target: aarch64-linux-gnu,      cross: 'aarch64-linux-gnu-',     suffix: linux-arm64, pkg: 'gcc-13-aarch64-linux-gnu' }
+          - { arch: arm,     target: arm-linux-gnueabihf,    cross: 'arm-linux-gnueabihf-',   suffix: linux-arm,   pkg: 'gcc-13-arm-linux-gnueabihf' }
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install cross-compilers
+      - name: Enable i386 architecture
+        if: matrix.arch == 'i686'
+        run: sudo dpkg --add-architecture i386
+
+      - name: Install cross-compiler
+        if: matrix.pkg != ''
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y \
-            gcc-multilib \
-            gcc-13-aarch64-linux-gnu \
-            gcc-13-arm-linux-gnueabihf
+          sudo apt-get install -y ${{ matrix.pkg }}
 
       - name: Build
         run: |
@@ -58,9 +59,9 @@ jobs:
       - name: Install LLVM MinGW for Windows ARM64
         if: matrix.arch == 'aarch64'
         run: |
-          curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20250326/llvm-mingw-20250326-ucrt-ubuntu-22.04-x86_64.tar.xz -o llvm-mingw.tar.xz
+          curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20260616/llvm-mingw-20260616-ucrt-ubuntu-22.04-x86_64.tar.xz -o llvm-mingw.tar.xz
           tar -xf llvm-mingw.tar.xz
-          echo "$PWD/llvm-mingw-20250326-ucrt-ubuntu-22.04-x86_64/bin" >> $GITHUB_PATH
+          echo "$PWD/llvm-mingw-20260616-ucrt-ubuntu-22.04-x86_64/bin" >> $GITHUB_PATH
 
       - name: Build
         if: matrix.arch != 'aarch64'
