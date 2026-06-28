@@ -5,7 +5,7 @@ BINDIR	= $(PREFIX)/bin
 LIBS	= -lm
 
 all:
-	$(CC) $(CFLAGS) -o $(EXE) $(LIBS) dtmf2num.c
+	$(CC) $(CFLAGS) -o $(EXE) dtmf2num.c $(LIBS)
 
 install:
 	install -m 755 -d $(BINDIR)

@@ -8,7 +8,7 @@ DTMF2NUM extracts DTMF and MF (Multi-Frequency) tones from WAV audio files and p
 
 ### Local build
 ```bash
-gcc -O2 -s -o dtmf2num -lm dtmf2num.c
+gcc -O2 -s -o dtmf2num dtmf2num.c -lm
 ```
 
 `dtmf2num.c` is the **only** compilation unit. `dsp.c` and `mywav.h` are `#include`d directly — there are no separate object files or link steps beyond `-lm`.
@@ -31,10 +31,10 @@ Windows targets use the standard `gcc-mingw-w64-*` apt packages.
 Build commands:
 ```bash
 # Linux / Windows x86/x86_64 (GCC)
-${cross}gcc -O2 -s -o dtmf2num-${suffix} -lm dtmf2num.c
+${cross}gcc -O2 -s -o dtmf2num-${suffix} dtmf2num.c -lm
 
 # Windows ARM64 (LLVM MinGW)
-aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-windows-arm64.exe -lm dtmf2num.c
+aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-windows-arm64.exe dtmf2num.c -lm
 ```
 
 Releases are only triggered on tags matching `v*`.

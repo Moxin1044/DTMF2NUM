@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         run: |
-          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }} -lm dtmf2num.c
+          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }} dtmf2num.c -lm
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -66,12 +66,12 @@ jobs:
       - name: Build
         if: matrix.arch != 'aarch64'
         run: |
-          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe -lm dtmf2num.c
+          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe dtmf2num.c -lm
 
       - name: Build (ARM64 via LLVM MinGW)
         if: matrix.arch == 'aarch64'
         run: |
-          aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe -lm dtmf2num.c
+          aarch64-w64-mingw32-clang -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe dtmf2num.c -lm
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
