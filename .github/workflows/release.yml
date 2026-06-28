@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64,  target: x86_64-linux-gnu,      cross: '',              suffix: linux-amd64 }
+          - { arch: i686,    target: i686-linux-gnu,         cross: 'i686-linux-gnu-',        suffix: linux-386 }
+          - { arch: aarch64, target: aarch64-linux-gnu,      cross: 'aarch64-linux-gnu-',     suffix: linux-arm64 }
+          - { arch: arm,     target: arm-linux-gnueabihf,    cross: 'arm-linux-gnueabihf-',   suffix: linux-arm }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compilers
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-multilib \
+            gcc-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabihf
+
+      - name: Build
+        run: |
+          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }} -lm dtmf2num.c
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtmf2num-${{ matrix.suffix }}
+          path: dtmf2num-${{ matrix.suffix }}
+
+  build-windows:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64,  target: x86_64-w64-mingw32,    cross: 'x86_64-w64-mingw32-',    suffix: windows-amd64 }
+          - { arch: i686,    target: i686-w64-mingw32,      cross: 'i686-w64-mingw32-',      suffix: windows-386 }
+          - { arch: aarch64, target: aarch64-w64-mingw32,   cross: 'aarch64-w64-mingw32-',   suffix: windows-arm64 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compilers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-mingw-w64-x86-64 \
+            gcc-mingw-w64-i686 \
+            gcc-mingw-w64-aarch64
+
+      - name: Build
+        run: |
+          ${cross}gcc -O2 -s -o dtmf2num-${{ matrix.suffix }}.exe -lm dtmf2num.c
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtmf2num-${{ matrix.suffix }}
+          path: dtmf2num-${{ matrix.suffix }}.exe
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: arm64,   suffix: macos-arm64 }
+          - { arch: x86_64,  suffix: macos-amd64 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cc -O2 -arch ${{ matrix.arch }} -o dtmf2num-${{ matrix.suffix }} dtmf2num.c
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtmf2num-${{ matrix.suffix }}
+          path: dtmf2num-${{ matrix.suffix }}
+
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
